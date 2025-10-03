@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🌿GaLaBau PräventionsPilot🌿</title>
+  <style>
+    :root{--bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#475569;--primary:#059669;--primary-700:#047857;--red:#ef4444;--amber:#f59e0b;--emerald:#10b981}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(#f8fafc,#ffffff);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    h1{font-size:28px;margin:0 0 8px}
+    .muted{color:var(--muted)}
+    .grid{display:grid;gap:12px}
+    .g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .g-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+    .card{background:var(--card);border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:16px;transition:background .3s,border-color .3s,box-shadow .3s}
+    .input{border:1px solid #cbd5e1;border-radius:12px;padding:10px 12px;font-size:14px}
+    .range{width:100%}
+    .btn{background:var(--primary);color:#fff;border:none;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn:hover{background:var(--primary-700)}
+    .headline{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+    .row{display:flex;gap:12px;align-items:end}
+    .badge{border:1px solid #cbd5e1;background:#fff8; padding:2px 8px;border-radius:9999px;font-size:12px}
+    .score{font-size:34px;font-weight:800;transition:color .3s}
+    .level{border:1px solid; border-radius:16px; padding:12px; display:flex; align-items:center; justify-content:space-between;transition:background .3s,border-color .3s,color .3s}
+    .level.red{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+    .level.amber{background:#ffedd5;color:#92400e;border-color:#fed7aa}
+    .level.green{background:#d1fae5;color:#065f46;border-color:#a7f3d0}
+    .list{margin:8px 0 0 18px; padding:0}
+    .list li{font-size:14px; margin:4px 0}
+    .bar{height:40px;border-radius:6px}
+    .tests li{font-size:12px}
+    .tests .pass{color:#065f46}
+    .tests .fail{color:#991b1b}
+    .tone-red{background:#fff7f7;border-color:#fed7d7}
+    .tone-amber{background:#fff7ed;border-color:#ffedd5}
+    .tone-green{background:#effcf7;border-color:#d1fae5}
+    .meter{height:8px;border-radius:9999px;background:linear-gradient(90deg,#a7f3d0,#facc15,#fca5a5);overflow:hidden}
+    .meter > i{position:relative;display:block;height:100%;background:rgba(0,0,0,.15);transform-origin:left center;transition:transform .5s}
+    .ring{width:130px;height:130px}
+    .delta{font-size:12px}
+    .legend{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:6px;font-size:13px}
+    .legend-color{width:14px;height:14px;border-radius:3px}
+    .legend-red{background:#ef4444}
+    .legend-amber{background:#f59e0b}
+    .legend-green{background:#10b981}
+    details.config summary{cursor:pointer;user-select:none;font-weight:600}
+    details.config .grid-controls{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+    .subtle{font-size:12px;color:#64748b}
+    @media (max-width:960px){.g-3{grid-template-columns:1fr}.g-5{grid-template-columns:1fr}.row{flex-direction:column;align-items:stretch} details.config .grid-controls{grid-template-columns:1fr}}
+  
+/* === Visual Polish Pack v1 (GBV) === */
+:root{
+  --bg:#f7fafc;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#475569;     /* slightly darker for contrast */
+  --primary:#0ea5e9;
+  --primary-700:#0284c7;
+  --ring-green:#10b981;
+  --ring-amber:#f59e0b;
+  --ring-red:#ef4444;
+
+  --shadow-1: 0 1px 2px rgba(0,0,0,.06), 0 1px 1px rgba(0,0,0,.04);
+  --shadow-2: 0 6px 18px rgba(2,8,23,.08);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 18px;
+  --space-5: 24px;
+}
+
+/* Layout helpers */
+.two-col{ grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 1100px){
+  .two-col{ grid-template-columns: 1fr !important; }
+}
+
+/* Cards */
+.card{
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+}
+.card:hover{
+  box-shadow: var(--shadow-2);
+  transform: translateY(-1px);
+}
+
+/* Headings & text */
+h1,h2,h3{ color: var(--text); letter-spacing:.2px }
+h2{ font-size: 20px; }
+h3{ font-size: 18px; }
+.muted{ color: var(--muted); }
+
+/* Forms */
+.input{
+  border-radius: var(--radius-sm);
+  transition: border-color .2s, box-shadow .2s;
+}
+.input:focus{
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(14,165,233,.2);
+}
+.btn{
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 1px 2px rgba(0,0,0,.06);
+}
+.btn:focus{ outline:none; box-shadow: 0 0 0 3px rgba(14,165,233,.25); }
+
+/* Badges */
+.badge{
+  background: linear-gradient(180deg,#fff, #f8fafc);
+  border-color:#e2e8f0;
+  font-weight:600;
+}
+
+/* Score coloring by tone */
+.tone-red .score{ color:#b91c1c; }
+.tone-amber .score{ color:#92400e; }
+.tone-green .score{ color:#065f46; }
+
+/* Meters */
+.meter{
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg,#d1fae5,#fde68a,#fecaca);
+}
+.meter > i::after{
+  content:"";
+  position:absolute; inset:0;
+  background: repeating-linear-gradient( 45deg, rgba(255,255,255,.2) 0 8px, rgba(255,255,255,.0) 8px 16px );
+  animation: slide 1.4s linear infinite;
+}
+@keyframes slide{ to { transform: translateX(40px); } }
+
+/* Legend tweaks */
+.legend{ gap: 10px; }
+.legend-color{ box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+
+/* Tables/Lists */
+.list li{ line-height: 1.4; }
+
+/* Error & info tones */
+.card.tone-red{ background:#fff7f7; border-color:#fde2e2; }
+.card.tone-amber{ background:#fff7ed; border-color:#ffedd5; }
+.card.tone-green{ background:#effcf7; border-color:#d1fae5; }
+
+/* Compact top controls spacing on mobile */
+@media (max-width: 720px){
+  .headline{ align-items: center; }
+  .row{ flex-wrap: wrap; align-items: stretch; }
+}
+/* === End Visual Polish Pack v1 === */
+
+  
+/* === GBV UI Add-ons: Badge + Skeleton (v2) === */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;font-weight:600;font-size:12px;border:1px solid #e2e8f0;background:linear-gradient(180deg,#fff,#f8fafc)}
+.badge i{width:8px;height:8px;border-radius:999px;box-shadow:0 0 0 1px rgba(0,0,0,.08) inset}
+.badge-low  {color:#065f46;border-color:#a7f3d0;background:#ecfdf5}
+.badge-mid  {color:#92400e;border-color:#fed7aa;background:#fff7ed}
+.badge-high {color:#7f1d1d;border-color:#fecaca;background:#fff1f2}
+
+.skeleton{position:relative;overflow:hidden;background:#e2e8f0;border-radius:10px}
+.skeleton::after{
+  content:"";position:absolute;inset:0;
+  transform:translateX(-100%);
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.55),rgba(255,255,255,0));
+  animation:gbv-shimmer 1.2s infinite;
+}
+@keyframes gbv-shimmer{to{transform:translateX(100%)}}
+.skel-line{height:12px;margin:8px 0}
+.skel-title{height:18px;width:60%;margin:4px 0}
+.skel-chip{height:20px;width:120px;border-radius:999px}
+.skel-tile{height:90px;border-radius:14px}
+
+  
+/* === GBV Typography & Utilities (v4) === */
+.h1{font-size:28px;line-height:1.25;margin:0 0 8px 0;font-weight:700;letter-spacing:.2px}
+.h2{font-size:20px;line-height:1.35;margin:0 0 6px 0;font-weight:700;letter-spacing:.2px}
+.h3{font-size:18px;line-height:1.35;margin:0 0 6px 0;font-weight:700;letter-spacing:.2px}
+.subtle{color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.nowrap{white-space:nowrap}
+.tooltip{cursor:help}
+
+  
+/* === GBV Iconography (v5) === */
+.icon{display:inline-flex;align-items:center;justify-content:center;margin-right:8px}
+.icon svg{width:18px;height:18px;display:block}
+
+  
+/* === GBV Layout: force top section stacked (v6) === */
+.one-col{ display:grid; grid-template-columns:1fr; gap:12px }
+
+  
+/* === GBV Hazard Icon Row (v7) === */
+.hazard-icon-row{display:flex;justify-content:center;align-items:center;margin:6px 0 2px 0}
+.hazard-icon-row .icon svg{width:22px;height:22px}
+
+    /* === Tooltip for matrix cells (v1) === */
+  .tt{position:relative}
+  .tt .tip{pointer-events:none;position:absolute;left:50%;bottom:28px;transform:translate(-50%,6px);opacity:0;transition:all .15s ease;border:1px solid #e2e8f0;background:#fff;border-radius:8px;box-shadow:0 8px 24px rgba(2,6,23,.08);padding:8px 10px;min-width:180px;z-index:10;font-size:12px;color:#0f172a;text-align:left}
+  .tt:hover .tip{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin="anonymous"></script>
+
+  <!-- Dev error surface to avoid Whitescreen -->
+  <script>
+    (function(){
+      function show(msg, src, line, col){
+        var d=document.getElementById('app');
+        var where = src ? ('<div style="margin-top:6px;font-size:12px;color:#475569">Quelle: '+src+(line?(':'+line+ (col?(':'+col):'')):'')+'</div>') : '';
+        if(d){ d.innerHTML = '<div style="padding:12px;color:#7f1d1d;background:#fee2e2;border:1px solid #fecaca;border-radius:8px;font-family:system-ui,Segoe UI,Roboto,sans-serif">'+
+          '<b>Fehler:</b> '+ String(msg) + where + '</div>'; }
+      }
+      window.addEventListener('error', function(e){ show(e && (e.message || e.error || e), e && e.filename, e && e.lineno, e && e.colno); });
+      window.addEventListener('unhandledrejection', function(e){ var r=e && e.reason; show(r && (r.message || r), (r && r.fileName)||'', (r && r.lineNumber)||'', (r && r.columnNumber)||''); });
+    })();
+  </script>
+
+  <!-- Dev error surface to avoid Whitescreen -->
+  <script>
+    (function(){
+      function show(msg){
+        var d=document.getElementById('app');
+        if(d){ d.innerHTML = '<div style="padding:12px;color:#7f1d1d;background:#fee2e2;border:1px solid #fecaca;border-radius:8px;font-family:system-ui,Segoe UI,Roboto,sans-serif">'+
+          '<b>Fehler:</b> '+ String(msg) +'</div>'; }
+      }
+      window.addEventListener('error', function(e){ show(e && (e.message || e.error || e)); });
+      window.addEventListener('unhandledrejection', function(e){ var r=e && e.reason; show(r && (r.message || r)); });
+    })();
+  </script>
+
+  <script type="text/babel">
+    
+
+/* === GBV Hazard Icons === */
+const HazardIcon = ({name}) => {
+  const c = "#0f172a"; // stroke color
+  const fill = "#0ea5e9";
+  switch((name||"").toLowerCase()){
+    case "hitze": // sun
+      return (
+        <svg viewBox="0 0 24 24" aria-label="Hitze">
+          <circle cx="12" cy="12" r="4.5" fill={fill} stroke={c} strokeWidth="1.5"/>
+          <g stroke={c} strokeWidth="1.5" strokeLinecap="round">
+            <path d="M12 2.5v3"/>
+            <path d="M12 18.5v3"/>
+            <path d="M2.5 12h3"/>
+            <path d="M18.5 12h3"/>
+            <path d="M5 5l2.2 2.2"/>
+            <path d="M16.8 16.8L19 19"/>
+            <path d="M19 5l-2.2 2.2"/>
+            <path d="M5 19l2.2-2.2"/>
+          </g>
+        </svg>
+      );
+    case "frost": // snowflake
+      return (
+        <svg viewBox="0 0 24 24" aria-label="Frost">
+          <g stroke={c} strokeWidth="1.5" strokeLinecap="round">
+            <path d="M12 3v18"/>
+            <path d="M7 6l5 3 5-3"/>
+            <path d="M7 18l5-3 5 3"/>
+            <path d="M3 12h18"/>
+            <path d="M6 7l3 5-3 5"/>
+            <path d="M18 7l-3 5 3 5"/>
+          </g>
+        </svg>
+      );
+    case "dürre":
+    case "duerre": // droplet minus
+      return (
+        <svg viewBox="0 0 24 24" aria-label="Dürre">
+          <path d="M12 3c3 4 5 6.5 5 9a5 5 0 1 1-10 0c0-2.5 2-5 5-9z" fill="none" stroke={c} strokeWidth="1.5"/>
+          <path d="M15.5 20.5h-7" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      );
+    case "sturm": // wind
+      return (
+        <svg viewBox="0 0 24 24" aria-label="Sturm">
+          <g fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round">
+            <path d="M3 8h10c2 0 3-1 3-2.5S15.5 3 14 3"/>
+            <path d="M3 12h13c2 0 3 1 3 2.5S18.5 18 17 18"/>
+            <path d="M3 16h7"/>
+          </g>
+        </svg>
+      );
+    case "hagel": // cloud + hail
+      return (
+        <svg viewBox="0 0 24 24" aria-label="Hagel">
+          <g fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round">
+            <path d="M7 15h9a4 4 0 1 0-1.2-7.8A5 5 0 0 0 7 9.5 3.5 3.5 0 0 0 7 15z" />
+            <circle cx="9" cy="18" r="1.4" fill={fill} stroke={c}/>
+            <circle cx="13" cy="19.5" r="1.4" fill={fill} stroke={c}/>
+            <circle cx="17" cy="18" r="1.4" fill={fill} stroke={c}/>
+          </g>
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+/* === GBV Helpers: Badge + Skeleton === */
+const levelFromScore = (score) => (score>=70 ? "high" : score>=40 ? "mid" : "low");
+const levelLabel     = (lvl)  => ({low:"Niedrig", mid:"Mittel", high:"Hoch"}[lvl] ?? "—");
+
+const Badge = ({ level, label, tip, children }) => {
+  const cls = `badge badge-${level} tooltip`;
+  const text = children ?? (label ?? levelLabel(level));
+  const dotColor = level === "high" ? "#ef4444" : level === "mid" ? "#f59e0b" : "#10b981";
+  const title = tip ? `${levelLabel(level)} – ${tip}` : `Risiko: ${levelLabel(level)}`;
+  return (
+    <span className={cls} title={title}>
+      <i style={{background: dotColor}}/>
+      {text}
+    </span>
+  );
+};
+
+const Skeleton = ({ when, className, style }) =>
+  when ? <div className={`skeleton ${className||""}`} style={style}/> : null;
+const { useState, useEffect } = React;
+
+    const DEFAULT_CONFIG = {
+      thresholds: {
+        heat_hot_c: 32,
+        heat_base_c: 28,
+        heat_extra_mult: 3,
+        frost_c: 0,
+        frost_mult: 12,
+        storm: { gust_low: 60, gust_high: 80, gust_veryhigh: 100, calm_score: 10, breezy_score: 30 },
+        hail: { prob_threshold: 60, code_weight: 12, prob_weight: 4 }
+      },
+      weights: {
+        open:       { heat:0.25, drought:0.35, frost:0.15, storm:0.20, hail:0.05 },
+        greenhouse: { heat:0.40, drought:0.15, frost:0.25, storm:0.15, hail:0.05 },
+        folietunnel:{ heat:0.35, drought:0.20, frost:0.15, storm:0.25, hail:0.05 },
+        container:  { heat:0.30, drought:0.45, frost:0.10, storm:0.10, hail:0.05 },
+        hagelnetz:  { heat:0.25, drought:0.35, frost:0.20, storm:0.18, hail:0.02 },
+        baumschule: { heat:0.15, drought:0.25, frost:0.30, storm:0.20, hail:0.10 },
+        topfpflanzen:{ heat:0.30, drought:0.50, frost:0.05, storm:0.10, hail:0.05 }
+      }
+    };
+
+    function loadConfig(){
+      try{ const raw = localStorage.getItem('risk_proto_config_v1'); if(!raw) return JSON.parse(JSON.stringify(DEFAULT_CONFIG)); const parsed = JSON.parse(raw); return { ...JSON.parse(JSON.stringify(DEFAULT_CONFIG)), ...parsed, thresholds: { ...DEFAULT_CONFIG.thresholds, ...(parsed.thresholds||{}) }, weights: { ...DEFAULT_CONFIG.weights, ...(parsed.weights||{}) } }; }catch(e){ return JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }
+    }
+    function saveConfig(cfg){ try{ localStorage.setItem('risk_proto_config_v1', JSON.stringify(cfg)); }catch(e){} }
+    function resetConfig(){ try{ localStorage.removeItem('risk_proto_config_v1'); }catch(e){} return JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }
+
+    function safe(a){ return Array.isArray(a) ? a : []; }
+    function toNum(v){ const x = Number(v); return Number.isFinite(x) ? x : null; }
+    function stats(a){ const arr = safe(a).map(toNum).filter(v=>v!==null); const sum = arr.reduce((p,c)=>p+c,0); return { sum, count: arr.length, arr }; }
+    function clamp(n, min=0, max=100){ return Math.max(min, Math.min(max, n)); }
+    function dispInt(v){ const x = toNum(v); return x===null ? "n/a" : Math.round(x); }
+    function dispFixed1(v){ const x = toNum(v); return x===null ? "n/a" : x.toFixed(1); }
+    function scoreToLevel(score){ if(score>=70) return {k:"red",label:"hoch",tone:"tone-red"}; if(score>=40) return {k:"amber",label:"mittel",tone:"tone-amber"}; return {k:"green",label:"niedrig",tone:"tone-green"}; }
+
+    async function fetchCoordsFromPLZ(plz){
+      const res = await fetch(`https://api.zippopotam.us/DE/${encodeURIComponent(plz)}`);
+      if(!res.ok) throw new Error("PLZ nicht gefunden oder Zippopotam nicht erreichbar");
+      const data = await res.json();
+      const places = Array.isArray(data?.places) ? data.places : [];
+      const place = places[0];
+      if(!place) throw new Error("Keine Geodaten zur PLZ gefunden");
+      return { lat: parseFloat(place.latitude), lon: parseFloat(place.longitude), placeName: `${place["place name"]}${data["state"] ? ", "+data["state"] : ""}` };
+    }
+
+    function iso(d){ return d.toISOString().slice(0,10); }
+
+    async function fetchForecast(lat, lon){
+      const url = new URL("https://api.open-meteo.com/v1/forecast");
+      url.searchParams.set("latitude", String(lat));
+      url.searchParams.set("longitude", String(lon));
+      url.searchParams.set("daily", [
+        "temperature_2m_max",
+        "temperature_2m_min",
+        "precipitation_sum",
+        "et0_fao_evapotranspiration",
+        "wind_speed_10m_max",
+        "wind_gusts_10m_max",
+        "precipitation_probability_max",
+        "weather_code"
+      ].join(","));
+      url.searchParams.set("timezone","auto");
+      url.searchParams.set("forecast_days","7");
+      const res = await fetch(url.toString());
+      if(!res.ok) throw new Error("Forecast API nicht erreichbar");
+      return res.json();
+    }
+
+    async function fetchArchive(lat, lon, endDate){
+      const start = new Date(endDate); start.setDate(start.getDate()-30);
+      const url = new URL("https://archive-api.open-meteo.com/v1/era5");
+      url.searchParams.set("latitude", String(lat));
+      url.searchParams.set("longitude", String(lon));
+      url.searchParams.set("start_date", iso(start));
+      url.searchParams.set("end_date", iso(endDate));
+      url.searchParams.set("daily", ["temperature_2m_max","temperature_2m_min","precipitation_sum"].join(","));
+      url.searchParams.set("timezone","auto");
+      const res = await fetch(url.toString());
+      if(!res.ok) throw new Error("Archive API nicht erreichbar");
+      return res.json();
+    }
+
+    function defaultWeights(type){
+      return DEFAULT_CONFIG.weights[type] || { heat:0.3, drought:0.3, frost:0.2, storm:0.15, hail:0.05 };
+    }
+    function getWeights(type){
+      const cfg = (window.__RISK_CONFIG || DEFAULT_CONFIG);
+      return cfg.weights?.[type] || defaultWeights(type);
+    }
+
+    function computeScores(type, forecast, archive){
+      const cfg = (window.__RISK_CONFIG || DEFAULT_CONFIG);
+      const thr = cfg.thresholds;
+      const d = forecast && forecast.daily ? forecast.daily : {};
+      const a = archive && archive.daily ? archive.daily : {};
+
+      const tmax = stats(d.temperature_2m_max);
+      const tmin = stats(d.temperature_2m_min);
+      const pr7  = stats(d.precipitation_sum);
+      const et07 = stats(d.et0_fao_evapotranspiration);
+      const pr30 = stats(a.precipitation_sum);
+      const gust = stats(d.wind_gusts_10m_max);
+      const pprob = stats(d.precipitation_probability_max);
+      const wcode = safe(d.weather_code).map(toNum).filter(v=>v!==null);
+
+      const hotDays = tmax.arr.filter(v=> v!==null && v>=thr.heat_hot_c).length;
+      const heatPartA = tmax.count ? (hotDays/Math.max(1,tmax.count))*70 : 0;
+      const meanTmax = tmax.count ? (tmax.sum/tmax.count) : null;
+      const heatPartB = meanTmax!==null ? Math.max(0, meanTmax-thr.heat_base_c)*thr.heat_extra_mult : 0;
+      const heatScore = clamp(heatPartA + heatPartB);
+
+      const minNext7 = tmin.count ? Math.min(...tmin.arr) : null;
+      const frostScore = clamp(minNext7!==null ? (thr.frost_c - Math.min(thr.frost_c, minNext7)) * thr.frost_mult : 0);
+
+      const base = pr30.count ? (pr30.sum <= 25 ? 70 : pr30.sum <= 40 ? 55 : pr30.sum <= 60 ? 35 : 15) : 0;
+      const stressAdj = (pr7.count && et07.count) ? clamp((et07.sum - pr7.sum)*4, -20, 25) : 0;
+      const droughtScore = clamp(base + stressAdj);
+
+      const maxGust = gust.count ? Math.max(...gust.arr) : null;
+      let stormScore = 0;
+      if(maxGust!==null){
+        if(maxGust<=thr.storm.gust_low-20) stormScore = thr.storm.calm_score;
+        else if(maxGust < thr.storm.gust_low) stormScore = Math.max(thr.storm.calm_score, 20);
+        else if(maxGust < thr.storm.gust_high) stormScore = 50 + (maxGust-thr.storm.gust_low) * (30/Math.max(1,(thr.storm.gust_high-thr.storm.gust_low)));
+        else if(maxGust < thr.storm.gust_veryhigh) stormScore = 80 + (maxGust-thr.storm.gust_high) * (20/Math.max(1,(thr.storm.gust_veryhigh-thr.storm.gust_high)));
+        else stormScore = 100;
+      }
+      stormScore = clamp(stormScore);
+
+      const hailDaysByCode = wcode.filter(c=> [95,96,99].includes(c)).length;
+      const highProbDays = pprob.arr.filter(p=> p>=thr.hail.prob_threshold).length;
+      const hailScore = clamp(hailDaysByCode*thr.hail.code_weight + highProbDays*thr.hail.prob_weight);
+
+      const weights = getWeights(type);
+      const overall = clamp(
+        heatScore*weights.heat +
+        droughtScore*weights.drought +
+        frostScore*weights.frost +
+        stormScore*weights.storm +
+        hailScore*weights.hail
+      );
+
+      const drivers = [];
+      if(tmax.count) drivers.push(`${hotDays}/${tmax.count} Tage ≥ ${thr.heat_hot_c}°C`); else drivers.push("Hitzeindikatoren: n/a");
+      if(meanTmax!==null) drivers.push(`Ø Tmax nächste 7 Tage: ${dispFixed1(meanTmax)}°C`); else drivers.push("Ø Tmax: n/a");
+      if(pr30.count) drivers.push(`Niederschlag 30T: ${dispFixed1(pr30.sum)} mm`); else drivers.push("Niederschlag 30T: n/a");
+      if(pr7.count) drivers.push(`Niederschlag 7T: ${dispFixed1(pr7.sum)} mm`); else drivers.push("Niederschlag 7T: n/a");
+      if(et07.count) drivers.push(`ET₀ 7T: ${dispFixed1(et07.sum)} mm`); else drivers.push("ET₀ 7T: n/a");
+      if(minNext7!==null) drivers.push(`Tmin min (7T): ${dispFixed1(minNext7)}°C`); else drivers.push("Tmin min (7T): n/a");
+      if(maxGust!==null) drivers.push(`Max. Böe (7T): ${dispFixed1(maxGust)} km/h`); else drivers.push("Böen: n/a");
+      drivers.push(`Gewittertage: ${hailDaysByCode} · Tage mit Niederschlags-W‘keit ≥${thr.hail.prob_threshold}%: ${highProbDays}`);
+
+      return { heatScore, frostScore, droughtScore, stormScore, hailScore, overall, drivers };
+    }
+
+    function Card({ title, score }){
+      const { k, label, tone } = scoreToLevel(score);
+      const pct = Math.max(0, Math.min(100, Number(score)||0));
+      return (
+        <div className={`card ${tone}`}>
+          <div className="headline"><h3 className="h3" style={{margin:0,fontSize:18}}>{title}</h3><span className="badge">{label}</span></div>
+          <div style={{display:"flex",alignItems:"flex-end",gap:12}}>
+            <div className="score">{dispInt(score)}</div>
+            <div className="muted" style={{fontSize:13}}>Score / 100</div>
+          </div>
+          <div className="meter" style={{marginTop:10}}><i style={{transform:`scaleX(${pct/100})`}} /></div>
+        </div>
+      );
+    }
+
+    function RiskProto(){
+      const [plz, setPlz] = useState("76131");
+      const [type, setType] = useState("greenhouse");
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState(null);
+      const [result, setResult] = useState(null);
+      const [prevOverall, setPrevOverall] = useState(null);
+      const [config, setConfig] = useState(loadConfig());
+
+      useEffect(()=>{ window.__RISK_CONFIG = config; }, [config]);
+
+      // Helper: per-day hazard levels for 7-day matrix
+      function dayLevelForIndex(idx){
+        if(!result) return null;
+        const cfg = (window.__RISK_CONFIG || DEFAULT_CONFIG);
+        const thr = cfg.thresholds;
+        const d = result?.forecast?.daily || {};
+        const tmax = Number(d.temperature_2m_max?.[idx]);
+        const tmin = Number(d.temperature_2m_min?.[idx]);
+        const pr   = Number(d.precipitation_sum?.[idx]);
+        const et0  = Number(d.et0_fao_evapotranspiration?.[idx]);
+        const gust = Number(d.wind_gusts_10m_max?.[idx]);
+        const pp   = Number(d.precipitation_probability_max?.[idx]);
+        const code = Number(d.weather_code?.[idx]);
+
+        // Heat
+        let heat='low'; if(Number.isFinite(tmax)){ if(tmax>=thr.heat_hot_c) heat='high'; else if(tmax>=thr.heat_base_c) heat='mid'; }
+        // Frost
+        let frost='low'; if(Number.isFinite(tmin)){ if(tmin<=thr.frost_c-2) frost='high'; else if(tmin<=thr.frost_c) frost='mid'; }
+        // Drought via daily stress + dry backdrop
+        let drought='low'; const stress=(Number.isFinite(et0)&&Number.isFinite(pr))?(et0-pr):null; if(stress!==null){ if(stress>=4) drought='high'; else if(stress>=2) drought='mid'; }
+        const pr30sum=(result?.archive?.daily?.precipitation_sum||[]).reduce((s,v)=>s+(Number(v)||0),0); if(pr30sum && pr30sum<=25){ drought = drought==='low' ? 'mid' : 'high'; }
+        // Storm
+        let storm='low'; if(Number.isFinite(gust)){ if(gust>=thr.storm.gust_veryhigh) storm='high'; else if(gust>=thr.storm.gust_low) storm='mid'; }
+        // Hail
+        let hail='low'; const hailCodes=[95,96,99]; if(hailCodes.includes(code)) hail='high'; else if(Number.isFinite(pp)){ if(pp>=thr.hail.prob_threshold+20) hail='high'; else if(pp>=thr.hail.prob_threshold) hail='mid'; }
+        return {heat,drought,frost,storm,hail};
+      }
+      function levelClass(lvl){ return lvl==='high'?'legend-red':(lvl==='mid'?'legend-amber':'legend-green'); }
+
+      // Detailed per-day info for tooltips
+      function dayCellInfo(idx){
+        const cfg = (window.__RISK_CONFIG || DEFAULT_CONFIG);
+        const thr = cfg.thresholds;
+        const d = result?.forecast?.daily || {};
+        const w = getWeights(type);
+        // helper: adjust visual level by type weight
+        const adjust = (lvl, weight)=>{
+          if(weight<=0.05) return 'low';
+          if(weight<0.15) return lvl==='high'?'mid':(lvl==='mid'?'low':'low');
+          if(weight>0.50) return lvl==='low'?'mid':(lvl==='mid'?'high':'high');
+          return lvl;
+        };
+
+        const tmax = Number(d.temperature_2m_max?.[idx]);
+        const tmin = Number(d.temperature_2m_min?.[idx]);
+        const pr   = Number(d.precipitation_sum?.[idx]);
+        const et0  = Number(d.et0_fao_evapotranspiration?.[idx]);
+        const gust = Number(d.wind_gusts_10m_max?.[idx]);
+        const pp   = Number(d.precipitation_probability_max?.[idx]);
+        const code = Number(d.weather_code?.[idx]);
+
+        let heatLvl = (Number.isFinite(tmax) && tmax>=thr.heat_hot_c)?'high':(Number.isFinite(tmax) && tmax>=thr.heat_base_c)?'mid':'low';
+        const heatTip = 'Tmax ' + (Number.isFinite(tmax)? tmax.toFixed(1)+'°C' : 'n/a') + ` · Gewicht ${(w.heat*100).toFixed(0)}%`;
+        heatLvl = adjust(heatLvl, w.heat);
+
+        let frostLvl = (Number.isFinite(tmin) && tmin<=thr.frost_c-2)?'high':(Number.isFinite(tmin) && tmin<=thr.frost_c)?'mid':'low';
+        const frostTip = 'Tmin ' + (Number.isFinite(tmin)? tmin.toFixed(1)+'°C' : 'n/a') + ` · Gewicht ${(w.frost*100).toFixed(0)}%`;
+        frostLvl = adjust(frostLvl, w.frost);
+
+        let droughtLvl='low';
+        let droughtTip='ET₀ '+(Number.isFinite(et0)?et0.toFixed(1):'n/a')+' mm · Pr '+(Number.isFinite(pr)?pr.toFixed(1):'n/a')+' mm';
+        if(Number.isFinite(et0) && Number.isFinite(pr)){
+          const diff = et0 - pr; droughtTip += ' (Δ ' + diff.toFixed(1) + ' mm)';
+          if(diff>=4) droughtLvl='high'; else if(diff>=2) droughtLvl='mid';
+        }
+        droughtTip += ` · Gewicht ${(w.drought*100).toFixed(0)}%`;
+        droughtLvl = adjust(droughtLvl, w.drought);
+
+        let stormLvl='low';
+        if(Number.isFinite(gust)){
+          if(gust>=thr.storm.gust_veryhigh) stormLvl='high'; else if(gust>=thr.storm.gust_low) stormLvl='mid';
+        }
+        const stormTip='Böe ' + (Number.isFinite(gust)? gust.toFixed(1)+' km/h' : 'n/a') + ` · Gewicht ${(w.storm*100).toFixed(0)}%`;
+        stormLvl = adjust(stormLvl, w.storm);
+
+        const hailCodes=[95,96,99];
+        let hailLvl='low';
+        if(hailCodes.includes(code)) hailLvl='high'; else if(Number.isFinite(pp)){ if(pp>=thr.hail.prob_threshold+20) hailLvl='high'; else if(pp>=thr.hail.prob_threshold) hailLvl='mid'; }
+        const hailTip='Pr% ' + (Number.isFinite(pp)? pp.toFixed(0)+'%' : 'n/a') + ' · WMO ' + (Number.isFinite(code)? String(code) : 'n/a') + ` · Gewicht ${(w.hail*100).toFixed(0)}%`;
+        hailLvl = adjust(hailLvl, w.hail);
+
+        return {
+          heat:   { lvl: heatLvl,   tip: heatTip },
+          drought:{ lvl: droughtLvl,tip: droughtTip },
+          frost:  { lvl: frostLvl,  tip: frostTip },
+          storm:  { lvl: stormLvl,  tip: stormTip },
+          hail:   { lvl: hailLvl,   tip: hailTip }
+        };
+      }
+
+      function updateWeight(t, key, val){
+        const v = Math.max(0, Math.min(1, Number(val)));
+        const next = { ...config, weights: { ...config.weights, [t]: { ...config.weights[t], [key]: v } } };
+        setConfig(next);
+      }
+      function updateThr(path, val){
+        const next = JSON.parse(JSON.stringify(config));
+        const parts = path.split('.');
+        let ref = next.thresholds; for(let i=0;i<parts.length-1;i++){ ref = ref[parts[i]]; }
+        ref[parts[parts.length-1]] = Number(val);
+        setConfig(next);
+      }
+
+      async function handleRun(){
+        setLoading(true); setError(null);
+        try{
+          window.__RISK_CONFIG = config;
+          const coords = await fetchCoordsFromPLZ(plz);
+          const forecast = await fetchForecast(coords.lat, coords.lon);
+          const archive = await fetchArchive(coords.lat, coords.lon, new Date());
+          const scores = computeScores(type, forecast, archive);
+          setPrevOverall(result?.scores?.overall ?? null);
+          setResult({ coords, forecast, archive, scores });
+        }catch(e){ setError(e && e.message ? e.message : String(e)); setResult(null); }
+        finally{ setLoading(false); }
+      }
+
+      const tests = (()=>{
+        const cases = [];
+        try{
+          const r1 = computeScores("open", { daily: { temperature_2m_max: [], temperature_2m_min: [], precipitation_sum: [] } }, { daily: { precipitation_sum: [] } });
+          cases.push({ name:"empty arrays", pass:["heatScore","frostScore","droughtScore","stormScore","hailScore","overall"].every(k=> Number.isFinite(Number(r1[k]))) });
+
+          const r2 = computeScores(
+            "greenhouse",
+            { daily: { temperature_2m_max: [null,35], temperature_2m_min: [null,18], precipitation_sum: [null,0], et0_fao_evapotranspiration: [null,5], wind_gusts_10m_max:[55,85], wind_speed_10m_max:[30,40], precipitation_probability_max:[null,70], weather_code:[null,95] } },
+            { daily: { precipitation_sum: [null,2,undefined,1] } }
+          );
+          cases.push({ name:"null/undefined + storm/hail proxies", pass:["heatScore","frostScore","droughtScore","stormScore","hailScore","overall"].every(k=> Number.isFinite(Number(r2[k]))) });
+
+          const r3 = computeScores("open", { daily: null }, { daily: null });
+          cases.push({ name:"missing daily", pass:["heatScore","frostScore","droughtScore","stormScore","hailScore","overall"].every(k=> Number.isFinite(Number(r3[k]))) });
+
+          const r4 = computeScores("open", { daily: { temperature_2m_max: ["x"], temperature_2m_min: ["y"], precipitation_sum: ["z"], wind_gusts_10m_max:["a"], precipitation_probability_max:["c"], weather_code:["d"] } }, { daily: { precipitation_sum: ["q"] } });
+          cases.push({ name:"non-numeric", pass:["heatScore","frostScore","droughtScore","stormScore","hailScore","overall"].every(k=> Number.isFinite(Number(r4[k]))) });
+
+          const shortForecast = { daily: { temperature_2m_max:[33,34,29], temperature_2m_min:[18,17,16], precipitation_sum:[0,2,0], et0_fao_evapotranspiration:[5,6,4], wind_gusts_10m_max:[65,70,75], precipitation_probability_max:[20,80,10], weather_code:[0,95,3] } };
+          const baseArchive = { daily: { precipitation_sum:new Array(30).fill(1) } };
+          const r5 = computeScores("folietunnel", shortForecast, baseArchive);
+          cases.push({ name:"short forecast 3 days", pass:["heatScore","frostScore","droughtScore","stormScore","hailScore","overall"].every(k=> Number.isFinite(Number(r5[k]))) });
+
+          const prevCfg = window.__RISK_CONFIG; window.__RISK_CONFIG = { ...DEFAULT_CONFIG, thresholds: { ...DEFAULT_CONFIG.thresholds, storm: { ...DEFAULT_CONFIG.thresholds.storm, gust_low: 20, gust_high: 30, gust_veryhigh: 40 } } };
+          const r6 = computeScores("open", { daily: { wind_gusts_10m_max:[25,28,35] } }, { daily: {} });
+          cases.push({ name:"config override storm thresholds", pass: Number(r6.stormScore) >= 50 });
+          window.__RISK_CONFIG = prevCfg;
+        }catch(e){ cases.push({ name:"runtime", pass:false, err:String(e) }); }
+        return cases;
+      })();
+
+      return (
+        <div className="container">
+          <header style={{marginBottom:16}}>
+            <h1>🌿GaLaBau PräventionsPilot🛩️</h1>
+            <div className="muted">Risikobewertung für <b>Dürre</b>, <b>Hitze</b>, <b>Frost</b>, <b>Sturm</b> und <b>Hagel</b> je PLZ – gewichtet nach Risikotyp.</div>
+            <div className="legend">
+              <div className="legend-item"><span className="legend-color legend-green"></span><span>Niedrig (0–39)</span></div>
+              <div className="legend-item"><span className="legend-color legend-amber"></span><span>Mittel (40–69)</span></div>
+              <div className="legend-item"><span className="legend-color legend-red"></span><span>Hoch (70–100)</span></div>
+            </div>
+          </header>
+
+          <details className="card config">
+            <summary>⚙️ Konfiguration</summary>
+            <div className="subtle" style={{marginTop:6}}>Änderungen werden in <code>localStorage</code> gespeichert und bleiben beim erneuten Öffnen erhalten. „Defaults wiederherstellen“ setzt alles zurück.</div>
+            <div className="grid-controls" style={{marginTop:12}}>
+              <div className="card" style={{padding:12}}>
+                <div className="muted" style={{fontSize:13,marginBottom:8}}><b>Gewichte</b> – {type}</div>
+                {Object.entries(getWeights(type)).map(([k,v])=> (
+                  <div key={k} style={{marginBottom:8}}>
+                    <label className="muted" style={{fontSize:12,textTransform:'uppercase'}}>{k}</label>
+                    <input className="range" type="range" min="0" max="1" step="0.01" value={config.weights[type][k]} onChange={e=>updateWeight(type,k,e.target.value)} />
+                    <div className="subtle">{(config.weights[type][k]*100).toFixed(0)} %</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="card" style={{padding:12}}>
+                <div className="muted" style={{fontSize:13,marginBottom:8}}><b>Schwellen</b> – Hitze/Frost</div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                  <label>Hitze ab (°C)<br/><input className="input" type="number" value={config.thresholds.heat_hot_c} onChange={e=>updateThr('heat_hot_c', e.target.value)} /></label>
+                  <label>Hitze‑Basis (°C)<br/><input className="input" type="number" value={config.thresholds.heat_base_c} onChange={e=>updateThr('heat_base_c', e.target.value)} /></label>
+                  <label>Hitze‑Mult.<br/><input className="input" type="number" value={config.thresholds.heat_extra_mult} onChange={e=>updateThr('heat_extra_mult', e.target.value)} /></label>
+                  <label>Frost ≤ (°C)<br/><input className="input" type="number" value={config.thresholds.frost_c} onChange={e=>updateThr('frost_c', e.target.value)} /></label>
+                  <label>Frost‑Mult.<br/><input className="input" type="number" value={config.thresholds.frost_mult} onChange={e=>updateThr('frost_mult', e.target.value)} /></label>
+                </div>
+              </div>
+
+              <div className="card" style={{padding:12}}>
+                <div className="muted" style={{fontSize:13,marginBottom:8}}><b>Sturm</b> – Böen‑Grenzen (km/h)</div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+                  <label>Low<br/><input className="input" type="number" value={config.thresholds.storm.gust_low} onChange={e=>updateThr('storm.gust_low', e.target.value)} /></label>
+                  <label>High<br/><input className="input" type="number" value={config.thresholds.storm.gust_high} onChange={e=>updateThr('storm.gust_high', e.target.value)} /></label>
+                  <label>Very High<br/><input className="input" type="number" value={config.thresholds.storm.gust_veryhigh} onChange={e=>updateThr('storm.gust_veryhigh', e.target.value)} /></label>
+                </div>
+              </div>
+
+              <div className="card" style={{padding:12}}>
+                <div className="muted" style={{fontSize:13,marginBottom:8}}><b>Hagel</b></div>
+                <label>Regen‑W'keit ≥ (%)<br/><input className="input" type="number" value={config.thresholds.hail.prob_threshold} onChange={e=>updateThr('hail.prob_threshold', e.target.value)} /></label>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8, marginTop:8}}>
+                  <label>Gewittertage‑Gewicht<br/><input className="input" type="number" value={config.thresholds.hail.code_weight} onChange={e=>updateThr('hail.code_weight', e.target.value)} /></label>
+                  <label>Regen‑W'keit‑Gewicht<br/><input className="input" type="number" value={config.thresholds.hail.prob_weight} onChange={e=>updateThr('hail.prob_weight', e.target.value)} /></label>
+                </div>
+              </div>
+
+              <div className="card" style={{padding:12,display:'flex',flexDirection:'column',gap:8,justifyContent:'space-between'}}>
+                <button className="btn" onClick={()=>{ saveConfig(config); alert('Konfiguration gespeichert (localStorage).'); }}>Speichern</button>
+                <button className="btn" style={{background:'#334155'}} onClick={()=>{ const next = resetConfig(); setConfig(next); alert('Defaults wiederhergestellt.'); }}>Defaults wiederherstellen</button>
+                <div className="subtle">Hinweis: Speicherung per <code>localStorage</code>; wirkt nur in diesem Browser/auf diesem Gerät.</div>
+              </div>
+            </div>
+          </details>
+
+          <section className="card" style={{marginTop:12}}>
+            <div className="grid g-3">
+              <div>
+                <div className="muted" style={{fontSize:13,marginBottom:6}}>Deutsche Postleitzahl</div>
+                <input className="input" value={plz} onChange={(e)=>setPlz(e.target.value)} placeholder="z. B. 76131" />
+              </div>
+              <div>
+                <div className="muted" style={{fontSize:13,marginBottom:6}}>Risikotyp</div>
+                <select className="input" value={type} onChange={(e)=>setType(e.target.value)}>
+                  <option value="open">Offene Gartenanlage</option>
+                  <option value="greenhouse">Gewächshaus</option>
+                  <option value="folietunnel">Folientunnel</option>
+                  <option value="container">Containerkulturen</option>
+                  <option value="hagelnetz">Freifläche mit Hagelnetzen</option>
+                  <option value="baumschule">Baumschule</option>
+                  <option value="topfpflanzen">Topfpflanzenproduktion im Freien</option>
+                </select>
+              </div>
+              <div className="row">
+                <button className="btn" onClick={handleRun} disabled={loading}>{loading?"Berechne…":"Risiko berechnen"}</button>
+              </div>
+            </div>
+          </section>
+
+          
+
+          {error && (
+            <section className="card" style={{marginTop:12, color:'#991b1b', background:'#fee2e2', borderColor:'#fecaca'}}>
+              {String(error)}
+            </section>
+          )}
+
+          {result && (
+            <section className="one-col" style={{marginTop:12}}>
+              <div className="grid" style={{gap:12}}>
+                <div className="card">
+                  <h3 className="h3" style={{margin:"0 0 8px",fontSize:18}}>Gesamtrisiko</h3>
+                  {(() => { const lvl = scoreToLevel(result.scores.overall); const pct = Math.max(0, Math.min(100, Number(result.scores.overall)||0)); const delta = prevOverall===null? null : Math.round((result.scores.overall - prevOverall)); return (
+                    <div style={{display:"flex",gap:16,alignItems:"center"}}>
+                      <svg viewBox="0 0 42 42" className="ring">
+                        <circle cx="21" cy="21" r="16" fill="none" stroke="#e5e7eb" strokeWidth="6"/>
+                        <circle cx="21" cy="21" r="16" fill="none" stroke={lvl.k==='red'?'#ef4444':lvl.k==='amber'?'#f59e0b':'#10b981'} strokeWidth="6" strokeDasharray={`${(pct/100)*100} 100`} strokeLinecap="round" transform="rotate(-90 21 21)"/>
+                        <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fontSize="12" fill="#0f172a">{dispInt(result.scores.overall)}</text>
+                      </svg>
+                      <div style={{flex:1}}>
+                        <div className={`level ${lvl.k}`}>
+                          <div style={{fontSize:14}}>Level: <b>{lvl.label}</b></div>
+                          <div className="delta">{delta===null? '–' : (delta>0? `▲ +${delta}` : delta<0? `▼ ${delta}` : '• 0')} </div>
+                        </div>
+                        <div className="meter" style={{marginTop:10}}><i style={{transform:`scaleX(${pct/100})`}} /></div>
+                      </div>
+                    </div>
+                  ); })()}
+                </div>
+
+                <div className="card">
+                  <div className="headline">
+                    <div>
+                      <h2 style={{margin:0,fontSize:20}}>Standort</h2>
+                      <div className="muted" style={{fontSize:13}}>{result.coords.placeName} · {dispFixed1(result.coords.lat)}°, {dispFixed1(result.coords.lon)}°</div>
+                    </div>
+                    <div className="muted" style={{fontSize:12}}>Stichtag: {new Date().toISOString().slice(0,10)}</div>
+                  </div>
+                  <div className="grid" style={{gridTemplateColumns:"repeat(5,1fr)",gap:12}}>
+                    <Card title="Hitze" score={result.scores.heatScore} />
+                    <Card title="Dürre" score={result.scores.droughtScore} />
+                    <Card title="Frost" score={result.scores.frostScore} />
+                    <Card title="Sturm" score={result.scores.stormScore} />
+                    <Card title="Hagel" score={result.scores.hailScore} />
+                  </div>
+                </div>
+
+                <div className="card"><h3 className="h3" style={{margin:"0 0 8px",fontSize:18}}>7‑Tage‑Risiko‑Matrix</h3>
+                  <div className="grid" style={{gridTemplateColumns:"90px repeat(7,1fr)",gap:6,alignItems:'center'}}>
+                    <div></div>
+                    {safe(result?.forecast?.daily?.time).map((t,idx)=> (
+                      <div key={String(t)} className="muted" style={{textAlign:'center',fontSize:12,fontWeight:600}}>{String(t).slice(5)}</div>
+                    ))}
+                    {[
+                      {label:'Hitze', key:'heat', icon:'Hitze'},
+                      {label:'Dürre', key:'drought', icon:'Dürre'},
+                      {label:'Frost', key:'frost', icon:'Frost'},
+                      {label:'Sturm', key:'storm', icon:'Sturm'},
+                      {label:'Hagel', key:'hail', icon:'Hagel'}
+                    ].map(row=> (
+                      <React.Fragment key={row.key}>
+                        <div className="muted" style={{fontSize:12,fontWeight:600,display:'flex',alignItems:'center',gap:8}}>
+                          <span className="icon"><HazardIcon name={row.icon}/></span>{row.label}
+                        </div>
+                        {safe(result?.forecast?.daily?.time).map((t,idx)=>{
+                          const lvObj = dayCellInfo(idx) || {}; const info = lvObj[row.key] || {lvl:'low', tip:''}; const lvl = info.lvl;
+                          return (
+                            <div key={String(t)+row.key} className="tt">
+                              <div className="bar" style={{height:18,borderRadius:6,background:'#e2e8f0',overflow:'hidden'}}>
+                                <div className={"legend-color " + levelClass(lvl)} style={{height:'100%',width:'100%'}}></div>
+                              </div>
+                              <div className="tip">{info.tip}</div>
+                            </div>
+                          );
+                        })}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            </section>
+          )}
+
+          {!result && !error && !error && (
+            <section className="card" style={{marginTop:12}}>
+              <h3 className="h3" style={{margin:"0 0 8px",fontSize:18}}>So funktioniert der MVP</h3>
+              <ol style={{marginLeft:18}} className="muted">
+                <li>PLZ → Koordinaten (Zippopotam).</li>
+                <li>7‑Tage‑Vorhersage + 30‑Tage‑Historie (Open‑Meteo).</li>
+                <li>Scores je Hazard (Hitze/Dürre/Frost/Sturm/Hagel) nach einfachen Regeln.</li>
+                <li>Gesamtrisiko gewichtet nach Typ (Offen/Gewächshaus, Folientunnel, Container, Hagelnetz, Baumschule, Topfpflanzen).</li>
+              </ol>
+            </section>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('app'));
+    root.render(<RiskProto />);
+  </script>
+</body>
+</html>
